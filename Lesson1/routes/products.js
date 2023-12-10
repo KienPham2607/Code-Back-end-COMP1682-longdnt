@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var ProductModel = require('../models/ProductModel');
 var CategoryModel = require('../models/CategoryModel');
+const { Model } = require("mongoose");
 
 // Show all categories
 // URL: localhost:3000/categories
@@ -20,13 +21,25 @@ router.get('/add', async (req, res) => {
 })
 
 router.post('/add', async (req, res) => {
-    var product = req.body;
-    await ProductModel.create(product);
-    res.redirect('/products');
+    try {
+        var product = req.body;
+        await ProductModel.create(product);
+        res.redirect('/products');
+    }
+    catch (err) {
+        if (err.name === 'ValidationError') {
+            let  InputErrors= {};
+            for (let field in err.errors) {
+                InputErrors[field] = err.errors[field].message;
+            }
+            res.render('product/add', { InputErrors, product });
+        }
+    }
 })
 
 router.get('/edit/:id', async (req, res) => {
     var id = req.params.id;
+    
     var product = await ProductModel.findById(id);
     res.render('product/edit', { product });
 })
@@ -36,6 +49,16 @@ router.post('/edit/:id', async (req, res) => {
     var data = req.body;
     await ProductModel.findByIdAndUpdate(id, data);
     res.redirect('/products');
+})
+
+router.post('/search', async (req, res) => {
+    var kw = req.body.keyword;
+    /* 
+    * "kw": This is the regular expression pattern. It's looking for a string that matched 
+    * "i": This is a flag indicating that the regular expression is case-insensitive. So, it will match patterns regardless of whether the characters are uppercase or lowercase.
+    */
+    var productList = await ProductModel.find({name: RegExp(kw, 'i')}); 
+    res.render('product/index', {productList});
 })
 
 module.exports = router;

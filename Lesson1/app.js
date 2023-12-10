@@ -9,8 +9,22 @@ var usersRouter = require('./routes/users');
 //3. Declare router (1 collection - 1 router)
 var categoryRouter = require('./routes/categories'); //location: routes/categories.js
 var productRouter = require('./routes/products')
+var authRouter = require('./routes/auth');
+
 
 var app = express();
+
+//4. Declare session
+var session = require('express-session');
+// Set session timeout
+const timeout = 1000 * 60 * 60 * 24;
+// config session middleware
+app.use(session({
+  secret: "alien_is_existed_or_not_it_is_still_a_secret",
+  saveUninitialized: false,
+  cookie: {maxAge: timeout},
+  resave: false
+}));
 
 //1. config mongoose library (connect and work with database)
 //1A. import library
@@ -40,6 +54,8 @@ app.use('/users', usersRouter);
 // 3B. declare URL (path) of routers
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
+app.use('/auth', authRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
