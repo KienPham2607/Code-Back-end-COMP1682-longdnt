@@ -2,7 +2,8 @@ var express = require('express')
 var bcrypt = require('bcryptjs')
 var router = express.Router()
 var UserModel = require('../models/UserModel');
-var salt = 8;
+
+var salt = 8; //random value
 
 router.get('/register', (req, res) => {
     res.render('auth/register')
@@ -36,8 +37,10 @@ router.post('/login', async (req, res) => {
     if (user) {
         var hash = bcrypt.compareSync(login.password, user.password);
         if (hash) {
-            // req.session
-            res.send("<h1>Login successfully </h1>");
+            //initialize session after login success
+            req.session.username = user.username;
+            // res.send("<h1>Login successfully </h1>");
+            res.redirect("/");
         } else {
             res.send("<h1>Login failed </h1>");
         }

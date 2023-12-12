@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 var ProductModel = require('../models/ProductModel');
 var CategoryModel = require('../models/CategoryModel');
-const { Model } = require("mongoose");
+const { Model, default: mongoose } = require("mongoose");
 
 // Show all categories
 // URL: localhost:3000/categories
@@ -60,5 +60,15 @@ router.post('/search', async (req, res) => {
     var productList = await ProductModel.find({name: RegExp(kw, 'i')}); 
     res.render('product/index', {productList});
 })
+
+router.get('/sort/asc', async (req, res) => {
+    var productList = await ProductModel.find().sort({ name: 1 }).populate('category');
+    res.render('product/index', { productList })
+});
+
+router.get('/sort/desc', async (req, res) => {
+    var productList = await ProductModel.find().sort({ name: -1 }).populate('category');
+    res.render('product/index', { productList })
+});
 
 module.exports = router;
